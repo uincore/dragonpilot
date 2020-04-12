@@ -174,6 +174,7 @@ keys = {
   "DragonLastModified": [TxType.PERSISTENT],
   "DragonEnableRegistration": [TxType.PERSISTENT],
   "DragonDynamicFollow": [TxType.PERSISTENT],
+  "DragonWei": [TxType.PERSISTENT],
   "DragonEnableGearCheck": [TxType.PERSISTENT],
   "DragonEnableTempMonitor": [TxType.PERSISTENT],
   "DragonEnableCurvatureLearner": [TxType.PERSISTENT],

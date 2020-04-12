@@ -307,7 +307,7 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kiV = [0.18, 0.12]
     else:
       try:
-        max_bp = float(params.get("DragonWei", encoding='utf8'))
+        max_bp = float(params.get("DragonSngResponse", encoding='utf8'))
       except (typeError, ValueError):
         max_bp = 0.
       ret.gasMaxBP = [max_bp]

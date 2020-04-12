@@ -80,6 +80,7 @@ default_conf = {
   'DragonCurvatureLearnerOffset': '0.0',
   'DragonAppAutoUpdate': '1',
   'DragonUpdating': '0',
+  'DragonToyotaSngResponse': '0.0',
 }
 
 deprecated_conf = {

@@ -6,6 +6,8 @@ from selfdrive.car.toyota.values import Ecu, ECU_FINGERPRINT, CAR, TSS2_CAR, FIN
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.swaglog import cloudlog
 from selfdrive.car.interfaces import CarInterfaceBase
+from common.params import Params
+params = Params()
 
 class CarInterface(CarInterfaceBase):
 
@@ -304,7 +306,11 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
       ret.longitudinalTuning.kiV = [0.18, 0.12]
     else:
-      ret.gasMaxBP = [0.]
+      try:
+        max_bp = float(params.get("DragonToyotaSngResponse", encoding='utf8'))
+      except (typeError, ValueError):
+        max_bp = 0.
+      ret.gasMaxBP = [max_bp]
       ret.gasMaxV = [0.5]
       ret.longitudinalTuning.kpV = [3.6, 2.4, 1.5]
       ret.longitudinalTuning.kiV = [0.54, 0.36]

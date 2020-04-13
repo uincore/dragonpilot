@@ -73,6 +73,27 @@ static void navigate_to_home(UIState *s) {
 #endif
 }
 
+static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
+  //dfButton manager  // code below thanks to kumar: https://github.com/arne182/openpilot/commit/71d5aac9f8a3f5942e89634b20cbabf3e19e3e78
+  if (s->awake && s->vision_connected && s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
+  int padding = 180; // width & height
+    if (touch_x >= 1650 && touch_x <= (1650 + padding) && touch_y >= 750 && touch_y <= (750 + padding)) {
+      s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping df button
+      int val = s->dragon_df_mode;
+      val++;
+      if (val >= 2) {
+        val = -1;
+      }
+      s->dragon_df_mode = val;
+      char val_str[2];
+      sprintf(val_str, "%d", val);
+      write_db_value(NULL, "DragonDynamicFollow", val_str, 2);
+      return true;
+    }
+  }
+  return false;
+}
+
 static void handle_sidebar_touch(UIState *s, int touch_x, int touch_y) {
   if (!s->scene.uilayout_sidebarcollapsed && touch_x <= sbr_w) {
     if (touch_x >= settings_btn_x && touch_x < (settings_btn_x + settings_btn_w)
@@ -119,6 +140,15 @@ static void read_param_float(float* param, const char* param_name) {
   }
 }
 
+static void read_param_int(int* param, const char* param_name) {
+  char *s;
+  const int result = read_db_value(NULL, param_name, &s, NULL);
+  if (result == 0) {
+    *param = std::stoi(s, NULL);
+    free(s);
+  }
+}
+
 static void read_param_bool_timeout(bool* param, const char* param_name, int* timeout) {
   if (*timeout > 0){
     (*timeout)--;
@@ -133,6 +163,15 @@ static void read_param_float_timeout(float* param, const char* param_name, int* 
     (*timeout)--;
   } else {
     read_param_float(param, param_name);
+    *timeout = 2 * UI_FREQ; // 0.5Hz
+  }
+}
+
+static void read_param_int_timeout(int* param, const char* param_name, int* timeout) {
+  if (*timeout > 0){
+    (*timeout)--;
+  } else {
+    read_param_int(param, param_name);
     *timeout = 2 * UI_FREQ; // 0.5Hz
   }
 }
@@ -249,6 +288,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   read_param_float(&s->dragon_ui_volume_boost, "DragonUIVolumeBoost");
   read_param_bool(&s->dragon_waze_mode, "DragonWazeMode");
   read_param_bool(&s->dragon_updating, "DragonUpdating");
+  read_param_int(&s->dragon_df_mode, "DragonDynamicFollow");
   if (s->dragon_waze_mode) {
     s->dragon_ui_speed = false;
     s->dragon_ui_event = false;
@@ -302,6 +342,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   s->dragon_waze_mode_timeout = UI_FREQ * 6.4;
   s->dragon_ui_dm_view_timeout = UI_FREQ * 6.5;
   s->dragon_updating_timeout = UI_FREQ * 10;
+  s->dragon_df_mode_timeout = UI_FREQ * 5.0;
 }
 
 static PathData read_path(cereal_ModelData_PathData_ptr pathp) {
@@ -994,10 +1035,16 @@ int main(int argc, char* argv[]) {
       // poll for touch events
       int touch_x = -1, touch_y = -1;
       int touched = touch_poll(&touch, &touch_x, &touch_y, 0);
+      bool button_touched = false;
       if (touched == 1) {
         set_awake(s, true);
         handle_sidebar_touch(s, touch_x, touch_y);
-        handle_vision_touch(s, touch_x, touch_y);
+        if (s->dragon_df_mode > -2) {
+          button_touched = handle_df_touch(s, touch_x, touch_y);
+        }
+        if (!button_touched) {
+          handle_vision_touch(s, touch_x, touch_y);
+        }
       }
     }
 
@@ -1094,6 +1141,7 @@ int main(int argc, char* argv[]) {
     read_param_float_timeout(&s->dragon_ui_volume_boost, "DragonUIVolumeBoost", &s->dragon_ui_volume_boost_timeout);
     read_param_bool_timeout(&s->dragon_waze_mode, "DragonWazeMode", &s->dragon_waze_mode_timeout);
     read_param_bool_timeout(&s->dragon_updating, "DragonUpdating", &s->dragon_updating_timeout);
+    read_param_int_timeout(&s->dragon_df_mode, "DragonDynamicFollow", &s->dragon_df_mode_timeout);
 
     if (s->dragon_waze_mode) {
       s->dragon_ui_speed = false;

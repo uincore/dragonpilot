@@ -787,6 +787,31 @@ static void ui_draw_vision_face(UIState *s) {
   nvgFill(s->vg);
 }
 
+static void ui_draw_df_button(UIState *s) {
+  int btn_w = 180;
+  int btn_h = 180;
+  int btn_x = 1650;
+  int btn_y = 750;
+
+  nvgBeginPath(s->vg);
+  nvgRoundedRect(s->vg, btn_x, btn_y, btn_w, btn_h, 20);
+  nvgStrokeColor(s->vg, nvgRGBA(255, 255, 255, 80));
+  nvgStrokeWidth(s->vg, 6);
+  nvgStroke(s->vg);
+
+  nvgFontFace(s->vg, "sans-bold");
+  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
+  nvgFontSize(s->vg, 48);
+  nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
+  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h / 2, s->dragon_df_mode == -1? "LONG" : s->dragon_df_mode == 0? "NORMAL" : "SHORT", NULL);
+
+  nvgFontFace(s->vg, "sans-regular");
+  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 80));
+  nvgFontSize(s->vg, 37.5);
+  nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
+  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h - 10, "DF Profile", NULL);
+}
+
 static void ui_draw_vision_header(UIState *s) {
   const UIScene *scene = &s->scene;
   int ui_viz_rx = scene->ui_viz_rx;
@@ -1117,6 +1142,9 @@ static void ui_draw_vision_footer(UIState *s) {
 
   if (s->dragon_ui_face) {
     ui_draw_vision_face(s);
+  }
+  if (s->dragon_df_mode > -2) {
+    ui_draw_df_button(s);
   }
 #ifdef SHOW_SPEEDLIMIT
   // ui_draw_vision_map(s);

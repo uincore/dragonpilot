@@ -43,12 +43,12 @@ const char *manifest_url = MANIFEST_URL_EON;
 
 #define UPDATE_DIR "/data/neoupdate"
 
-extern const uint8_t bin_opensans_regular[] asm("_binary_NotoSansCJKtc_Regular_otf_start");
-extern const uint8_t bin_opensans_regular_end[] asm("_binary_NotoSansCJKtc_Regular_otf_end");
-extern const uint8_t bin_opensans_semibold[] asm("_binary_NotoSansCJKtc_Medium_otf_start");
-extern const uint8_t bin_opensans_semibold_end[] asm("_binary_NotoSansCJKtc_Medium_otf_end");
-extern const uint8_t bin_opensans_bold[] asm("_binary_NotoSansCJKtc_Bold_otf_start");
-extern const uint8_t bin_opensans_bold_end[] asm("_binary_NotoSansCJKtc_Bold_otf_end");
+extern const uint8_t bin_opensans_regular[] asm("_binary_opensans_regular_ttf_start");
+extern const uint8_t bin_opensans_regular_end[] asm("_binary_opensans_regular_ttf_end");
+extern const uint8_t bin_opensans_semibold[] asm("_binary_opensans_semibold_ttf_start");
+extern const uint8_t bin_opensans_semibold_end[] asm("_binary_opensans_semibold_ttf_end");
+extern const uint8_t bin_opensans_bold[] asm("_binary_opensans_bold_ttf_start");
+extern const uint8_t bin_opensans_bold_end[] asm("_binary_opensans_bold_ttf_end");
 
 namespace {
 
@@ -322,18 +322,18 @@ struct Updater {
   std::string stage_download(std::string url, std::string hash, std::string name) {
     std::string out_fn = UPDATE_DIR "/" + util::base_name(url);
 
-    set_progress("下載 " + name + " 中...");
+    set_progress("Downloading " + name + "...");
     bool r = download_file(url, out_fn);
     if (!r) {
-      set_error("無法下載 " + name);
+      set_error("failed to download " + name);
       return "";
     }
 
-    set_progress("驗證 " + name + " 中...");
+    set_progress("Verifying " + name + "...");
     std::string fn_hash = sha256_file(out_fn);
-    printf("得到 %s hash: %s\n", name.c_str(), hash.c_str());
+    printf("got %s hash: %s\n", name.c_str(), hash.c_str());
     if (fn_hash != hash) {
-      set_error(name + " 已損壞");
+      set_error(name + " was corrupt");
       unlink(out_fn.c_str());
       return "";
     }
@@ -357,7 +357,7 @@ struct Updater {
     }
 
     if (!check_space()) {
-      set_error("您需要至少 2GB 的空間進行升級");
+      set_error("2GB of free space required to update");
       return;
     }
 
@@ -365,7 +365,7 @@ struct Updater {
 
     const int EON = (access("/EON", F_OK) != -1);
 
-    set_progress("尋找最新的版本...");
+    set_progress("Finding latest version...");
     std::string manifest_s;
     if (EON) {
       manifest_s = download_string(curl, manifest_url);
@@ -374,12 +374,12 @@ struct Updater {
       exit(0);
     }
 
-    printf("宣示說明: %s\n", manifest_s.c_str());
+    printf("manifest: %s\n", manifest_s.c_str());
 
     std::string err;
     auto manifest = json11::Json::parse(manifest_s, err);
     if (manifest.is_null() || !err.empty()) {
-      set_error("無法載入新的宣示說明");
+      set_error("failed to load update manifest");
       return;
     }
 
@@ -394,7 +394,7 @@ struct Updater {
     // std::string installer_hash = manifest["installer_hash"].string_value();
 
     if (ota_url.empty() || ota_hash.empty()) {
-      set_error("錯誤的宣示說明");
+      set_error("invalid update manifest");
       return;
     }
 
@@ -406,12 +406,12 @@ struct Updater {
 
     std::string recovery_fn;
     if (recovery_url.empty() || recovery_hash.empty() || recovery_len == 0) {
-      set_progress("跳過 recovery 更新...");
+      set_progress("Skipping recovery flash...");
     } else {
       // only download the recovery if it differs from what's flashed
-      set_progress("檢查 recovery...");
+      set_progress("Checking recovery...");
       std::string existing_recovery_hash = sha256_file(RECOVERY_DEV, recovery_len);
-      printf("目前 recovery 的 hash: %s\n", existing_recovery_hash.c_str());
+      printf("existing recovery hash: %s\n", existing_recovery_hash.c_str());
 
       if (existing_recovery_hash != recovery_hash) {
         recovery_fn = stage_download(recovery_url, recovery_hash, "recovery");
@@ -441,18 +441,18 @@ struct Updater {
 
     if (!recovery_fn.empty()) {
       // flash recovery
-      set_progress("刷新 recovery...");
+      set_progress("Flashing recovery...");
 
       FILE *flash_file = fopen(recovery_fn.c_str(), "rb");
       if (!flash_file) {
-        set_error("刷新 recovery 失敗");
+        set_error("failed to flash recovery");
         return;
       }
 
       FILE *recovery_dev = fopen(RECOVERY_DEV, "w+b");
       if (!recovery_dev) {
         fclose(flash_file);
-        set_error("刷新 recovery 失敗");
+        set_error("failed to flash recovery");
         return;
       }
 
@@ -467,7 +467,7 @@ struct Updater {
         if (bytes_read != bytes_written) {
           fclose(recovery_dev);
           fclose(flash_file);
-          set_error("刷新 recovery 失敗: 無法寫入");
+          set_error("failed to flash recovery: write failed");
           return;
         }
       }
@@ -475,12 +475,12 @@ struct Updater {
       fclose(recovery_dev);
       fclose(flash_file);
 
-      set_progress("驗證新的 recovery...");
+      set_progress("Verifying flash...");
       std::string new_recovery_hash = sha256_file(RECOVERY_DEV, recovery_len);
-      printf("新的 recovery hash: %s\n", new_recovery_hash.c_str());
+      printf("new recovery hash: %s\n", new_recovery_hash.c_str());
 
       if (new_recovery_hash != recovery_hash) {
-        set_error("刷新 recovery 失敗");
+        set_error("recovery flash corrupted");
         return;
       }
 
@@ -489,13 +489,13 @@ struct Updater {
     // write arguments to recovery
     FILE *cmd_file = fopen(RECOVERY_COMMAND, "wb");
     if (!cmd_file) {
-      set_error("無法重啟至 recovery");
+      set_error("failed to reboot into recovery");
       return;
     }
     fprintf(cmd_file, "--update_package=%s\n", ota_fn.c_str());
     fclose(cmd_file);
 
-    set_progress("重新啟動");
+    set_progress("Rebooting");
 
     // remove the continue.sh so we come back into the setup.
     // maybe we should go directly into the installer, but what if we don't come back with internet? :/
@@ -562,9 +562,9 @@ struct Updater {
   }
 
   void draw_battery_screen() {
-    low_battery_title = "電量過低";
-    low_battery_text = "請將您的 EON 充電。當電量達到 35% 時系統將會繼續更新。";
-    low_battery_context = "目前的電量為: " + battery_cap_text + "%";
+    low_battery_title = "Low Battery";
+    low_battery_text = "Please connect EON to your charger. Update will continue once EON battery reaches 35%.";
+    low_battery_context = "Current battery charge: " + battery_cap_text + "%";
 
     nvgFillColor(vg, nvgRGBA(255,255,255,255));
     nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
@@ -601,7 +601,7 @@ struct Updater {
       int powerprompt_y = 312;
       nvgFontFace(vg, "opensans_regular");
       nvgFontSize(vg, 64.0f);
-      nvgText(vg, fb_w/2, 740, "請確保您的 EON 已接上充電器。", NULL);
+      nvgText(vg, fb_w/2, 740, "Ensure EON is connected to power.", NULL);
 
       NVGpaint paint = nvgBoxGradient(
           vg, progress_x + 1, progress_y + 1,
@@ -635,10 +635,10 @@ struct Updater {
 
     switch (state) {
     case CONFIRMATION:
-      draw_ack_screen("NEOS 需要更新。",
-                      "您的設備將在點擊繼續後開始更新。\n更新檔約為 1GB 我們建議您先連接至無線網路。\n設備上現有的檔案不會丟失。",
-                      "繼續",
-                      "連線至無線網路");
+      draw_ack_screen("An update to NEOS is required.",
+                      "Your device will now be reset and upgraded. You may want to connect to wifi as download is around 1 GB. Existing data on device should not be lost.",
+                      "Continue",
+                      "Connect to WiFi");
       break;
     case LOW_BATTERY:
       draw_battery_screen();
@@ -647,7 +647,7 @@ struct Updater {
       draw_progress_screen();
       break;
     case ERROR:
-      draw_ack_screen("發生錯誤", (error_text).c_str(), NULL, "重新啟動");
+      draw_ack_screen("There was an error", (error_text).c_str(), NULL, "Reboot");
       break;
     }
 

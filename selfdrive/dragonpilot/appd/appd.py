@@ -326,13 +326,14 @@ def main():
 
   # enable hotspot on boot
   if params.get("DragonBootHotspot", encoding='utf8') == "1":
-    system(f"settings put system accelerometer_rotation 0")
-    system(f"settings put system user_rotation 1")
-    system(f"pm enable com.android.settings")
-    system(f"am start -n com.android.settings/.TetherSettings")
-    time.sleep(1)
-    system(f"LD_LIBRARY_PATH= input tap 995 160")
-    system(f"pkill com.android.settings")
+    system(f"service call wifi 37 i32 0 i32 1")
+    # system(f"settings put system accelerometer_rotation 0")
+    # system(f"settings put system user_rotation 1")
+    # system(f"pm enable com.android.settings")
+    # system(f"am start -n com.android.settings/.TetherSettings")
+    # time.sleep(1)
+    # system(f"LD_LIBRARY_PATH= input tap 995 160")
+    # system(f"pkill com.android.settings")
 
   last_started = False
   thermal_sock = messaging.sub_sock('thermal')

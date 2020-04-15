@@ -264,7 +264,7 @@ static void ui_draw_sidebar_panda_metric(UIState *s, bool hasSidebar) {
       (s->scene.hwType == cereal_HealthData_HwType_uno)) {
       if (s->scene.satelliteCount == -1) {
         panda_severity = 0;
-        snprintf(panda_message_str, sizeof(panda_message_str), "%s", "PANDA\nA已连接");
+        snprintf(panda_message_str, sizeof(panda_message_str), "%s", "PANDA\n已连接");
       } else {
         if (s->scene.satelliteCount < 6) {
           panda_severity = 1;

@@ -801,15 +801,15 @@ static void ui_draw_df_button(UIState *s) {
 
   nvgFontFace(s->vg, "sans-bold");
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 200));
-  nvgFontSize(s->vg, 48);
+  nvgFontSize(s->vg, 48*2);
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
-  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h / 2, s->dragon_df_mode == -1? "LONG" : s->dragon_df_mode == 0? "NORMAL" : "SHORT", NULL);
+  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h / 2, s->dragon_df_mode == -1? "长距" : s->dragon_df_mode == 0? "正常" : "短距", NULL);
 
   nvgFontFace(s->vg, "sans-regular");
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 200));
   nvgFontSize(s->vg, 37.5);
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
-  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h - 10, "DF PROFILE", NULL);
+  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h - 10, "跟车距离", NULL);
 }
 
 static void ui_draw_vision_header(UIState *s) {

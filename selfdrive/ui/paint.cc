@@ -800,16 +800,16 @@ static void ui_draw_df_button(UIState *s) {
   nvgStroke(s->vg);
 
   nvgFontFace(s->vg, "sans-bold");
-  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
-  nvgFontSize(s->vg, 48);
+  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 200));
+  nvgFontSize(s->vg, 48*2);
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
-  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h / 2, s->dragon_df_mode == -1? "LONG" : s->dragon_df_mode == 0? "NORMAL" : "SHORT", NULL);
+  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h / 2, s->dragon_df_mode == -1? "长距" : s->dragon_df_mode == 0? "正常" : "短距", NULL);
 
   nvgFontFace(s->vg, "sans-regular");
-  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 80));
+  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 200));
   nvgFontSize(s->vg, 37.5);
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
-  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h - 10, "DF Profile", NULL);
+  nvgText(s->vg, btn_x + btn_w / 2, btn_y + btn_h - 10, "跟车距离", NULL);
 }
 
 static void ui_draw_vision_header(UIState *s) {
@@ -863,7 +863,7 @@ static void ui_draw_infobar(UIState *s) {
 
   char infobar[100];
   // create time string
-  char date_time[17];
+  char date_time[20];
   time_t rawtime = time(NULL);
   struct tm timeinfo;
   localtime_r(&rawtime, &timeinfo);
@@ -919,7 +919,7 @@ static void ui_draw_infobar(UIState *s) {
 
   nvgBeginPath(s->vg);
   nvgRect(s->vg, rect_x, rect_y, rect_w, rect_h);
-  nvgFillColor(s->vg, nvgRGBA(0, 0, 0, 180));
+  nvgFillColor(s->vg, nvgRGBA(0, 0, 0, 100));
   nvgFill(s->vg);
 
   nvgFontSize(s->vg, hasSidebar? 35:42);
@@ -1143,7 +1143,7 @@ static void ui_draw_vision_footer(UIState *s) {
   if (s->dragon_ui_face) {
     ui_draw_vision_face(s);
   }
-  if (s->dragon_df_mode > -2) {
+  if (!s->dragon_waze_mode && s->dragon_df_mode > -2) {
     ui_draw_df_button(s);
   }
 #ifdef SHOW_SPEEDLIMIT

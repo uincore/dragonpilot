@@ -87,9 +87,9 @@ class LongitudinalMpc():
       modified = dp_get_last_modified()
       if self.last_modified != modified:
         try:
-          self.df_profile = int(self.params.get('DragonDynamicFollow', encoding='utf8'))
+          self.df_profile = int(self.params.get('DragonDynamicFollow', encoding='utf8').rstrip('\x00'))
           self.df_profile = self.df_profile if self.df_profile in [DF_PROFILE_OFF, DF_PROFILE_LONG, DF_PROFILE_NORMAL, DF_PROFILE_SHORT] else DF_PROFILE_OFF
-        except TypeError:
+        except (ValueError, TypeError):
           self.df_profile = DF_PROFILE_OFF
       self.last_modified = modified
       self.last_ts = ts

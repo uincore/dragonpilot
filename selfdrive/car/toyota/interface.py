@@ -308,7 +308,7 @@ class CarInterface(CarInterfaceBase):
     else:
       try:
         max_bp = max(0., float(params.get("DragonToyotaSngResponse", encoding='utf8')))
-      except (typeError, ValueError):
+      except (TypeError, ValueError):
         max_bp = 0.
       ret.gasMaxBP = [max_bp]
       ret.gasMaxV = [0.5]

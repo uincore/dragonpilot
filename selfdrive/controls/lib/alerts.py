@@ -1,3 +1,5 @@
+# This Python file uses the following encoding: utf-8
+# -*- coding: utf-8 -*-
 from cereal import car, log
 
 # Priority
@@ -821,4 +823,52 @@ ALERTS = [
       "Lane Departure Detected",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
+
+  # dp
+  Alert(
+    "preLaneChangeLeftALC",
+    "Left ALC will engage in 3 seconds",
+    "Monitor Other Vehicles",
+    AlertStatus.normal, AlertSize.mid,
+    Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1, alert_rate=0.75),
+
+  Alert(
+    "preLaneChangeRightALC",
+    "Right ALC will engage in 3 seconds",
+    "Monitor Other Vehicles",
+    AlertStatus.normal, AlertSize.mid,
+    Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1, alert_rate=0.75),
+
+  Alert(
+    "laneChangeALC",
+    "Changing Lane",
+    "Monitor Other Vehicles",
+    AlertStatus.normal, AlertSize.mid,
+    Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
+
+  Alert(
+    "manualSteeringRequired",
+    "STEERING REQUIRED: Lane Keeping OFF",
+    "",
+    AlertStatus.normal, AlertSize.small,
+    Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
+
+  Alert(
+    "manualSteeringRequiredBlinkersOn",
+    "STEERING REQUIRED: Blinkers ON",
+    "",
+    AlertStatus.normal, AlertSize.small,
+    Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
+  Alert(
+    "leadCarMoving",
+    "Lead Car Is Moving",
+    "",
+    AlertStatus.userPrompt, AlertSize.small,
+    Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
+  Alert(
+    "leadCarDetected",
+    "Lead Car Detected",
+    "",
+    AlertStatus.normal, AlertSize.small,
+    Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
 ]
